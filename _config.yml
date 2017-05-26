@@ -157,4 +157,4 @@ prose:
           label: "Visual Workflow Chart (Some Layouts)"
           value: "true"
 
-theme: jekyll-theme-cayman
+theme: jekyll-theme-hacker
