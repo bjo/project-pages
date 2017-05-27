@@ -6,6 +6,7 @@ tags:       post template
 subtitle:   Trying out first post
 category:   test
 ---
+<!-- Start Writing Below in Markdown -->
 
 Imagine this scenario: an alien that has stumbled upon Earth learns that
 humans are roughly organized into political entities called countries.
@@ -37,15 +38,10 @@ First, we download the data of world population by country from the
 [World Bank](http://data.worldbank.org/indicator/SP.POP.TOTL) to sample
 from. In particular, let's use the data from year 2014:
 
+{% highlight R %}
+
     library(ggplot2)
-
-    ## Warning: package 'ggplot2' was built under R version 3.2.5
-
     library(matrixStats)
-
-    ## Warning: package 'matrixStats' was built under R version 3.2.5
-
-    ## matrixStats v0.51.0 (2016-10-08) successfully loaded. See ?matrixStats for help.
 
     # Need to do some data cleaning
     world_pop_data = read.table('API_SP.POP.TOTL_DS2_en_csv_v2/API_SP.POP.TOTL_DS2_en_csv_v2.csv', sep=',', stringsAsFactors=FALSE, header=TRUE)
@@ -80,6 +76,9 @@ from. In particular, let's use the data from year 2014:
 
     ## [1] 214   3
 
+{% endhighlight %}
+
+
 There are 214 'countries' in this dataset for which a population is
 given. (Actually, not all of the rows are real countries. For example,
 the first entry of this table, Aruba, is actually part of the
@@ -90,6 +89,8 @@ sake of this exercise, let's assume that each row is a country and it
 accurately gives us the population of each country.)
 
 Let's take a look at how the population is distributed among countries:
+
+{% highlight R %}
 
     ordered_population_df = data.frame(ind = c(1:214), name = sample_df$CountryName[(order(pop_vector, decreasing = TRUE))], pop = pop_vector[(order(pop_vector, decreasing = TRUE))])
     print(head(ordered_population_df, n = 20))
@@ -116,15 +117,21 @@ Let's take a look at how the population is distributed among countries:
     ## 19  19   Congo, Dem. Rep.   74877030
     ## 20  20           Thailand   67725979
 
+{% endhighlight %}
+
 We have two countries (China and India) whose population exceeds one
 billion, followed by nine countries whose population exceeds 100
 million. It might be reasonable to guess that the population
 distribution by country is roughly log-normal, as this pattern appears
 regularly in nature.
 
+{% highlight R %}
+
     ggplot(data.frame(ind = c(1:214), pop = log10(pop_vector)), aes(pop)) + geom_histogram(bins=50) + ggtitle('Log10 of population histogram') + xlab('Log10 of population')
 
-![](src/stats/world_population_boostrap/chunk-4-1.png)
+{% endhighlight %}
+
+![img1](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-4-1.png)
 
 However, we can see that the population is not distributed in a
 log-normal fashion. There is also another phenomenon, [Zipf's
@@ -134,14 +141,20 @@ of words used in a language or population rank of cities. Let's try to
 see if the Zipf model is reasonable for population distribution over
 countries:
 
+{% highlight R %}
+
     ordered_population_df$zipf_pop = sapply(c(1:214), function(x) {max(pop_vector)/x})
     ggplot(ordered_population_df, aes(ind)) + geom_line(aes(y = log10(pop), colour = "Actual")) + geom_line(aes(y = log10(zipf_pop), colour = "Theoretical Zipfian")) + ggtitle('Log10 of population by country') + xlab('Country index')
 
-![](src/stats/world_population_boostrap/chunk-5-1.png)
+{% endhighlight %}
+
+![img2](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-5-1.png)
 
     ggplot(ordered_population_df[c(1:50),], aes(ind)) + geom_line(aes(y = log10(pop), colour = "Actual")) + geom_line(aes(y = log10(zipf_pop), colour = "Theoretical Zipfian")) + ggtitle('Log10 of population by country') + xlab('Country index')
 
-![](src/stats/world_population_boostrap/chunk-5-2.png)
+{% endhighlight %}
+
+![img3](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-5-2.png)
 
 We can see that while this model fits remarkably well for the first 50
 countries or so, it falls apart after that: it seems like there is
@@ -153,6 +166,8 @@ to this information), let's get back to our sampling (alien abduction)
 scheme. What if our capacity to sample has a maximum of 100,000
 individuals? Would that give us a pretty good estimate for most
 countries?
+
+{% highlight R %}
 
     # Let's reorder the sample_df and pop_vector
     sample_df = sample_df[(order(pop_vector, decreasing = TRUE)),]
@@ -203,6 +218,8 @@ countries?
     ## PLW         PLW                     Palau    21097         0
     ## TUV         TUV                    Tuvalu     9893         0
 
+{% endhighlight %}
+
 As we can see from above, roughly 19% of our samples are Chinese, while
 roughly 18% are Indian. But there actually are a lot countries (15 to be
 exact in this example), that are missing in this sample. We will return
@@ -211,12 +228,16 @@ that these countries exist because they are not present in our sample.
 Let's try to see how well our sample corresponds to the underlying
 reality, with 'Actual' distribution scaled by our sample size:
 
+{% highlight R %}
+
     sample_df$ind = c(1:214)
     diff = log10(total_documented_pop/100000)
     # We're missing representatives from 15 countries in this sample.
     ggplot(sample_df, aes(ind)) + geom_line(aes(y = log10(TotalPop)-diff, colour = "Actual")) + geom_line(aes(y = log10(SamplePop), colour = "Sample")) + ggtitle('Log10 of population by country, sampled') + xlab('Country index') + ylab('Sampled population')
 
-![](src/stats/world_population_boostrap/chunk-7-1.png)
+{% endhighlight %}
+
+![img4](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-7-1.png)
 
 It seems pretty good right now. Now that we have the 100,000
 individuals, we can politely ask each person what their nationality is,
@@ -246,6 +267,8 @@ we can provide a measure of uncertainty in the underlying distribution
 by re-sampling from our data, and seeing how our statistic (population
 proportions in this case) fluctuates. Let's start with 100 re-samplings:
 
+{% highlight R %}
+
     # Let's generate the bootstrap samples:
     pop_code_vector = unlist(sapply(c(1:214), function(x) {rep(as.character(sample_df$CountryCode[x]), sample_df$SamplePop[x])}))
 
@@ -264,6 +287,8 @@ proportions in this case) fluctuates. Let's start with 100 re-samplings:
     #save(num_countries, bootstrap_samples, file = 'bootstrap_results_100.RData')
 
     load('bootstrap_results_100.RData')
+
+{% endhighlight %}
 
 Now that we have the bootstrapped samples, there are actually several
 ways we can assign confidence intervals in our estimated statistic.
@@ -309,6 +334,8 @@ boostrap statistics defined above.
 Let's see these confidence intervals in action, and we how well it
 performed in our data:
 
+{% highlight R %}
+
     # Let's generate the confidence interval for the proportion of each country's population:
     rowmean = rowMeans(bootstrap_samples)
     rowvar = rowVars(bootstrap_samples)
@@ -333,12 +360,22 @@ performed in our data:
 
     ggplot(bootstrap_df[c(1:50),], aes(ind, log10(TotalPop)-diff))+geom_point()+geom_line(aes(ind,log10(bts_mean_est)))+geom_ribbon(aes(ymin=log10(bts_norm_conf_low),ymax=log10(bts_norm_conf_high)),alpha=0.3) + ggtitle('Countries 1-50, bootstrap estimates of population')
 
-![](src/stats/world_population_boostrap/chunk-9-1.png)
+{% endhighlight %}
+
+![img5](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-9-1.png)
+
+{% highlight R %}
 
     ggplot(bootstrap_df[c(51:150),], aes(ind, log10(TotalPop)-diff))+geom_point()+geom_line(aes(ind,log10(bts_mean_est)))+geom_ribbon(aes(ymin=log10(bts_norm_conf_low),ymax=log10(bts_norm_conf_high)),alpha=0.3) + ggtitle('Countries 51-150, bootstrap estimates of population')
 
-![](src/stats/world_population_boostrap/chunk-9-2.png)
+{% endhighlight %}
+
+![img6](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-9-2.png)
+
+{% highlight R %}
 
     ggplot(bootstrap_df[c(151:214),], aes(ind, log10(TotalPop)-diff))+geom_point()+geom_line(aes(ind,log10(bts_mean_est)))+geom_ribbon(aes(ymin=log10(bts_norm_conf_low),ymax=log10(bts_norm_conf_high)),alpha=0.3) + ggtitle('Countries 151-214, bootstrap estimates of population')
 
-![](src/stats/world_population_boostrap/chunk-9-3.png)
+{% endhighlight %}
+
+![img7](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-9-3.png)
