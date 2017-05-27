@@ -131,7 +131,7 @@ regularly in nature.
 
 {% endhighlight %}
 
-![img1](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-4-1.png)
+![img1](http://projectpages.github.io/project-pages/img/src/stats/world_population_bootstrap/chunk-4-1.png)
 
 However, we can see that the population is not distributed in a
 log-normal fashion. There is also another phenomenon, [Zipf's
@@ -148,13 +148,13 @@ countries:
 
 {% endhighlight %}
 
-![img2](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-5-1.png)
+![img2](http://projectpages.github.io/project-pages/img/src/stats/world_population_bootstrap/chunk-5-1.png)
 
     ggplot(ordered_population_df[c(1:50),], aes(ind)) + geom_line(aes(y = log10(pop), colour = "Actual")) + geom_line(aes(y = log10(zipf_pop), colour = "Theoretical Zipfian")) + ggtitle('Log10 of population by country') + xlab('Country index')
 
 {% endhighlight %}
 
-![img3](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-5-2.png)
+![img3](http://projectpages.github.io/project-pages/img/src/stats/world_population_bootstrap/chunk-5-2.png)
 
 We can see that while this model fits remarkably well for the first 50
 countries or so, it falls apart after that: it seems like there is
@@ -237,7 +237,7 @@ reality, with 'Actual' distribution scaled by our sample size:
 
 {% endhighlight %}
 
-![img4](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-7-1.png)
+![img4](http://projectpages.github.io/project-pages/img/src/stats/world_population_bootstrap/chunk-7-1.png)
 
 It seems pretty good right now. Now that we have the 100,000
 individuals, we can politely ask each person what their nationality is,
@@ -362,7 +362,7 @@ performed in our data:
 
 {% endhighlight %}
 
-![img5](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-9-1.png)
+![img5](http://projectpages.github.io/project-pages/img/src/stats/world_population_bootstrap/chunk-9-1.png)
 
 {% highlight R %}
 
@@ -370,7 +370,7 @@ performed in our data:
 
 {% endhighlight %}
 
-![img6](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-9-2.png)
+![img6](http://projectpages.github.io/project-pages/img/src/stats/world_population_bootstrap/chunk-9-2.png)
 
 {% highlight R %}
 
@@ -378,4 +378,4 @@ performed in our data:
 
 {% endhighlight %}
 
-![img7](http://projectpages.github.io/project-pages/src/stats/world_population_boostrap/chunk-9-3.png)
+![img7](http://projectpages.github.io/project-pages/img/src/stats/world_population_bootstrap/chunk-9-3.png)
